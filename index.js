@@ -23,14 +23,11 @@ connection.once("open",()=>{
   console.log("Database connected");
 })
 
-
 app.use(bodyParser.json())
 
 app.use(
 
   (req,res,next)=>{
-
-
 
     const token = req.header("Authorization")?.replace("Bearer ","")
     console.log(token)
@@ -52,8 +49,6 @@ app.use(
 
 )
 app.use("/api/users",userRouter)
-
-
 
 app.listen(
   5000,
