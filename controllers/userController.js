@@ -275,22 +275,23 @@ export async function forgotPassword(req, res) {
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
     
     const mailOptions = {
-      from: `"Crystal Beauty Clear" <${process.env.EMAIL_USERNAME}>`, 
+      from: `"Doc Finder" <${process.env.EMAIL_USERNAME}>`, 
       to: email, 
       subject: 'Password Reset Request',
       text: `You requested a password reset. Please click the following link to reset your password:\n\n${resetUrl}\n\nThis link will expire in 1 hour.`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #D4AF37;">Password Reset Request</h2>
-          <p>You requested a password reset for your Crystal Beauty Clear account.</p>
+          <h2 style="color: #1649a8ff;">Password Reset Request</h2>
+          <p>You requested a password reset for your DocFinder account.</p>
           <p>Please click the button below to reset your password:</p>
-          <a href="${resetUrl}" style="display: inline-block; padding: 10px 20px; background-color: #D4AF37; color: white; text-decoration: none; border-radius: 4px; margin: 20px 0;">
+          <a href="${resetUrl}" style="display: inline-block; padding: 10px 20px; background-color: #3858b6ff; color: white; text-decoration: none; border-radius: 4px; margin: 20px 0;">
             Reset Password
           </a>
           <p>This link will expire in 1 hour.</p>
           <p>If you didn't request this, please ignore this email.</p>
           <hr>
-          <p style="font-size: 12px; color: #777;">Crystal Beauty Clear Team</p>
+          <p style="font-size: 12px; color: #777;">This is an automated email. Please do not reply to this message.</p>
+
         </div>
       `
     };
