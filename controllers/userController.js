@@ -272,7 +272,9 @@ export async function forgotPassword(req, res) {
       }
     });
 
-    const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+    //const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+    
+const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${encodeURIComponent(resetToken)}`;
     
     const mailOptions = {
       from: `"Doc Finder" <${process.env.EMAIL_USERNAME}>`, 
