@@ -2,6 +2,8 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
 import userRouter from './routes/userRouter.js';
+import doctorRouter from './routes/doctorRoutes.js';
+import specialtyRouter from './routes/specialtyRoutes.js';
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 
@@ -49,6 +51,8 @@ app.use(
 
 )
 app.use("/api/users",userRouter)
+app.use("/api/doctors", doctorRouter);
+app.use("/api/specialties", specialtyRouter);
 
 app.listen(
   5000,

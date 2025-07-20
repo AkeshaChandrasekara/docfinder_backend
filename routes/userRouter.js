@@ -41,4 +41,5 @@ userRouter.post("/reset-password/:token", resetPassword);
 userRouter.get("/verify-reset-token/:token", verifyResetToken);
 
 
-export default userRouter;
+//export default userRouter;
+export { userRouter as default, verifyToken };
