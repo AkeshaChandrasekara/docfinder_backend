@@ -39,7 +39,7 @@ export async function createSpecialty(req, res) {
     const specialty = new Specialty({
       name: req.body.name,
       description: req.body.description || '',
-      icon: req.body.icon || 'https://cdn-icons-png.flaticon.com/512/2965/2965300.png'
+    
     });
 
     await specialty.validate();

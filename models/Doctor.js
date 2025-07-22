@@ -9,8 +9,18 @@ const doctorSchema = mongoose.Schema({
   qualifications: [{ type: String }],
   experience: { type: Number, required: true },
   bio: { type: String },
-  photo: { type: String, default: "https://cdn-icons-png.flaticon.com/512/3304/3304567.png" },
+    photo: { 
+    type: String,
+   // default: "https://cdn-icons-png.flaticon.com/512/3304/3304567.png"
+        default    :"https://cdn-icons-png.flaticon.com/512/8815/8815112.png"
+  },
   hospital: { type: String },
+   channelingCenter: { type: mongoose.Schema.Types.ObjectId, ref: 'ChanellingCenter', required: false },
+  consultationFee: {
+    type: Number,
+    required: true,
+    default: 4000 
+  },
   availableDays: [{
     day: { 
       type: String, 

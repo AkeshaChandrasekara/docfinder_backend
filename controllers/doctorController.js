@@ -6,6 +6,7 @@ export async function getAllDoctors(req, res) {
     const doctors = await Doctor.find().populate({
       path: 'specialty',
       model: 'Specialty' 
+     
     });
     
     if (!doctors || doctors.length === 0) {
@@ -133,10 +134,16 @@ export async function deleteDoctor(req, res) {
 
 export async function getDoctorById(req, res) {
   try {
-    const doctor = await Doctor.findById(req.params.id).populate({
-      path: 'specialty',
-      model: 'Specialty'
-    });
+   const doctor = await Doctor.findById(req.params.id).populate([
+      {
+        path: 'specialty',
+        model: 'Specialty'
+      },
+      {
+        path: 'channelingCenter',
+        model: 'ChanellingCenter'
+      }
+    ]);
     
     if (!doctor) {
       return res.status(404).json({

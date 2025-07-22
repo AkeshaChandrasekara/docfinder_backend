@@ -4,6 +4,8 @@ import mongoose from 'mongoose';
 import userRouter from './routes/userRouter.js';
 import doctorRouter from './routes/doctorRoutes.js';
 import specialtyRouter from './routes/specialtyRoutes.js';
+import appointmentRouter from './routes/appointmentRoutes.js'
+import chanellingCenterRoutes from './routes/chanellingCenterRoutes.js'
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 
@@ -53,6 +55,8 @@ app.use(
 app.use("/api/users",userRouter)
 app.use("/api/doctors", doctorRouter);
 app.use("/api/specialties", specialtyRouter);
+app.use("/api/appointments", appointmentRouter);
+app.use("/api/chanelling-centers", chanellingCenterRoutes);
 
 app.listen(
   5000,
