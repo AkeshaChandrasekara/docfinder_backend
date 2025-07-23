@@ -134,13 +134,13 @@ export async function deleteDoctor(req, res) {
 
 export async function getDoctorById(req, res) {
   try {
-   const doctor = await Doctor.findById(req.params.id).populate([
+    const doctor = await Doctor.findById(req.params.id).populate([
       {
         path: 'specialty',
         model: 'Specialty'
       },
       {
-        path: 'channelingCenter',
+        path: 'chanellingCenter',
         model: 'ChanellingCenter'
       }
     ]);
@@ -151,7 +151,7 @@ export async function getDoctorById(req, res) {
         message: "Doctor not found"
       });
     }
-
+ console.log("Doctor with populated center:", doctor);
     res.status(200).json({
       success: true,
       data: doctor

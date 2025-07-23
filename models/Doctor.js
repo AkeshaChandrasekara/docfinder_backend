@@ -15,7 +15,8 @@ const doctorSchema = mongoose.Schema({
         default    :"https://cdn-icons-png.flaticon.com/512/8815/8815112.png"
   },
   hospital: { type: String },
-   channelingCenter: { type: mongoose.Schema.Types.ObjectId, ref: 'ChanellingCenter', required: false },
+   //channelingCenter: { type: mongoose.Schema.Types.ObjectId, ref: 'ChanellingCenter', required: false },
+  chanellingCenter: { type: mongoose.Schema.Types.ObjectId, ref: 'ChanellingCenter', required: false },
   consultationFee: {
     type: Number,
     required: true,

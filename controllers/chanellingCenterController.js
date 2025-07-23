@@ -3,11 +3,6 @@ import mongoose from "mongoose";
 
 export const getAllChanellingCenters = async (req, res) => {
   try {
-    const token = req.headers.authorization?.split(' ')[1];
-    if (!token) {
-      return res.status(401).json({ message: "Authorization token required" });
-    }
-
     const centers = await ChanellingCenter.find();
     res.status(200).json({
       success: true,
