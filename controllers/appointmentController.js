@@ -222,3 +222,34 @@ export async function updateAppointmentStatus(req, res) {
     });
   }
 }
+
+export async function getUserAppointments(req, res) {
+  try {
+    const token = req.header("Authorization")?.replace("Bearer ", "");
+    const decoded = jwt.verify(token, process.env.SECRET);
+    
+    const appointments = await Appointment.find({ user: decoded.id })
+      .populate({
+        path: 'doctor',
+        select: 'firstName lastName specialty photo consultationFee',
+        populate: {
+          path: 'specialty',
+          model: 'Specialty',
+          select: 'name'
+        }
+      })
+      .sort({ date: -1, createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      data: appointments
+    });
+  } catch (error) {
+    console.error('Error fetching user appointments:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch user appointments',
+      error: error.message
+    });
+  }
+}
