@@ -287,7 +287,7 @@ export async function resetPassword(req, res) {
 
     res.json({ message: "Password updated successfully" });
   } catch (error) {
-    console.error('Reset password failed:', error.message); // Debug log
+    console.error('Reset password failed:', error.message); 
     res.status(400).json({ message: "Invalid or expired token" });
   }
 }
