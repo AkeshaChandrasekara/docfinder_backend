@@ -6,6 +6,7 @@ import doctorRouter from './routes/doctorRoutes.js';
 import specialtyRouter from './routes/specialtyRoutes.js';
 import appointmentRouter from './routes/appointmentRoutes.js'
 import chanellingCenterRoutes from './routes/chanellingCenterRoutes.js'
+import paymentRouter from './routes/paymentRoutes.js'
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 
@@ -57,6 +58,7 @@ app.use("/api/doctors", doctorRouter);
 app.use("/api/specialties", specialtyRouter);
 app.use("/api/appointments", appointmentRouter);
 app.use("/api/chanelling-centers", chanellingCenterRoutes);
+app.use("/api/payments", paymentRouter);
 
 app.listen(
   5000,
