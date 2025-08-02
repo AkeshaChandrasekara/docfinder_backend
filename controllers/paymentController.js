@@ -10,13 +10,17 @@ export const createPaymentIntent = async (req, res) => {
     
     const doctor = await Doctor.findById(doctorId);
     if (!doctor) {
-      return res.status(404).json({ success: false, message: 'Doctor not found' });
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Doctor not found' 
+      });
     }
 
-    const frontendBaseUrl = process.env.FRONTEND_URL.startsWith('https') 
-      ? process.env.FRONTEND_URL 
-      : `https://${process.env.FRONTEND_URL}`;
-    
+    const isProduction = process.env.NODE_ENV === 'production';
+    const frontendBaseUrl = isProduction 
+      ? `https://${process.env.FRONTEND_URL}` 
+      : process.env.FRONTEND_URL || 'http://localhost:3000';
+
     const successUrl = `${frontendBaseUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}`;
     const cancelUrl = `${frontendBaseUrl}/booking/${doctorId}?payment_canceled=true`;
 
@@ -82,7 +86,7 @@ export const handlePaymentSuccess = async (req, res) => {
 
     const { doctorId, userId, appointmentData } = session.metadata;
     const parsedAppointmentData = JSON.parse(appointmentData);
-    
+ 
     const appointment = new Appointment({
       doctor: doctorId,
       user: userId,
@@ -94,8 +98,9 @@ export const handlePaymentSuccess = async (req, res) => {
       phoneNumber: parsedAppointmentData.phoneNumber,
       email: parsedAppointmentData.email,
       notes: parsedAppointmentData.notes,
-      status: 'paid',
+      status: 'confirmed',
       paymentMethod: 'payOnline',
+      paymentStatus: 'paid',
       consultationFee: parsedAppointmentData.consultationFee
     });
 
