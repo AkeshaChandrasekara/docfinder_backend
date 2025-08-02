@@ -13,9 +13,9 @@ export const createPaymentIntent = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Doctor not found' });
     }
 
-    const frontendBaseUrl = process.env.FRONTEND_URL.startsWith('http') 
+    const frontendBaseUrl = process.env.FRONTEND_URL.startsWith('https') 
       ? process.env.FRONTEND_URL 
-      : `http://${process.env.FRONTEND_URL}`;
+      : `https://${process.env.FRONTEND_URL}`;
     
     const successUrl = `${frontendBaseUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}`;
     const cancelUrl = `${frontendBaseUrl}/booking/${doctorId}?payment_canceled=true`;
