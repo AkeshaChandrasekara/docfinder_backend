@@ -2,22 +2,41 @@ import stripePackage from 'stripe';
 import Appointment from '../models/appointment.js';
 import Doctor from '../models/Doctor.js';
 
+console.log('Initializing Stripe with key:', process.env.STRIPE_SECRET_KEY ? '***REDACTED***' : 'MISSING');
 const stripe = stripePackage(process.env.STRIPE_SECRET_KEY);
 
 export const createPaymentIntent = async (req, res) => {
   try {
-    console.log('Creating payment intent...'); 
+    console.log('Received payment intent request:', {
+      amount: req.body.amount,
+      doctorId: req.body.doctorId,
+      hasAppointmentData: !!req.body.appointmentData,
+      user: req.user?.id
+    });
+
     if (!req.body.amount || !req.body.doctorId || !req.body.appointmentData) {
-      console.error('Missing required fields');
+      console.error('Missing required fields:', {
+        amount: req.body.amount,
+        doctorId: req.body.doctorId,
+        appointmentData: req.body.appointmentData
+      });
       return res.status(400).json({
         success: false,
-        message: 'Missing required fields: amount, doctorId, or appointmentData'
+        message: 'Missing required fields'
       });
     }
 
     const { amount, doctorId, appointmentData } = req.body;
+   
     const amountInCents = Math.round(Number(amount));
-    
+    if (isNaN(amountInCents) || amountInCents <= 0) {
+      console.error('Invalid amount:', amount);
+      return res.status(400).json({
+        success: false,
+        message: 'Amount must be a positive number'
+      });
+    }
+
     const doctor = await Doctor.findById(doctorId);
     if (!doctor) {
       console.error('Doctor not found:', doctorId);
@@ -26,12 +45,11 @@ export const createPaymentIntent = async (req, res) => {
         message: 'Doctor not found' 
       });
     }
-
     const frontendBaseUrl = process.env.FRONTEND_URL || 'https://docfinder-online.vercel.app';
     const successUrl = `${frontendBaseUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}`;
     const cancelUrl = `${frontendBaseUrl}/booking/${doctorId}?payment_canceled=true`;
 
-    console.log('Creating Stripe session...');
+    console.log('Creating Stripe checkout session...');
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [{
@@ -50,7 +68,7 @@ export const createPaymentIntent = async (req, res) => {
       cancel_url: cancelUrl,
       metadata: {
         doctorId: doctorId.toString(),
-        userId: req.user.id.toString(),
+        userId: req.user?.id?.toString(),
         appointmentData: JSON.stringify({
           ...appointmentData,
           consultationFee: doctor.consultationFee
@@ -58,14 +76,19 @@ export const createPaymentIntent = async (req, res) => {
       }
     });
 
-    console.log('Stripe session created:', session.id); 
-    res.status(200).json({ 
+    console.log('Stripe session created successfully:', session.id);
+    return res.status(200).json({ 
       success: true, 
       sessionId: session.id 
     });
+
   } catch (error) {
-    console.error('Error creating payment intent:', error);
-    res.status(500).json({ 
+    console.error('Error in createPaymentIntent:', {
+      error: error.message,
+      stack: error.stack,
+      stripeError: error.raw || null
+    });
+    return res.status(500).json({ 
       success: false, 
       message: 'Failed to create payment intent',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
