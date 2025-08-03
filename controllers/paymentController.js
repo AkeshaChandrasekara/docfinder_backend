@@ -2,7 +2,6 @@ import stripePackage from 'stripe';
 import Appointment from '../models/appointment.js';
 import Doctor from '../models/Doctor.js';
 
-console.log('Initializing Stripe with key:', process.env.STRIPE_SECRET_KEY ? '***REDACTED***' : 'MISSING');
 const stripe = stripePackage(process.env.STRIPE_SECRET_KEY);
 
 export const createPaymentIntent = async (req, res) => {
@@ -15,11 +14,7 @@ export const createPaymentIntent = async (req, res) => {
     });
 
     if (!req.body.amount || !req.body.doctorId || !req.body.appointmentData) {
-      console.error('Missing required fields:', {
-        amount: req.body.amount,
-        doctorId: req.body.doctorId,
-        appointmentData: req.body.appointmentData
-      });
+      console.error('Missing required fields');
       return res.status(400).json({
         success: false,
         message: 'Missing required fields'
@@ -27,7 +22,7 @@ export const createPaymentIntent = async (req, res) => {
     }
 
     const { amount, doctorId, appointmentData } = req.body;
-   
+    
     const amountInCents = Math.round(Number(amount));
     if (isNaN(amountInCents) || amountInCents <= 0) {
       console.error('Invalid amount:', amount);
@@ -45,11 +40,22 @@ export const createPaymentIntent = async (req, res) => {
         message: 'Doctor not found' 
       });
     }
-    const frontendBaseUrl = process.env.FRONTEND_URL || 'https://docfinder-online.vercel.app';
-    const successUrl = `${frontendBaseUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}`;
-    const cancelUrl = `${frontendBaseUrl}/booking/${doctorId}?payment_canceled=true`;
+    let frontendBaseUrl = process.env.FRONTEND_URL || 'https://docfinder-online.vercel.app';
+    if (!frontendBaseUrl.startsWith('http')) {
+      frontendBaseUrl = `https://${frontendBaseUrl}`;
+    }
 
-    console.log('Creating Stripe checkout session...');
+    const successUrl = new URL('/payment-success', frontendBaseUrl);
+    successUrl.searchParams.set('session_id', '{CHECKOUT_SESSION_ID}');
+    
+    const cancelUrl = new URL(`/booking/${doctorId}`, frontendBaseUrl);
+    cancelUrl.searchParams.set('payment_canceled', 'true');
+
+    console.log('Creating Stripe checkout session with URLs:', {
+      successUrl: successUrl.toString(),
+      cancelUrl: cancelUrl.toString()
+    });
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [{
@@ -64,8 +70,8 @@ export const createPaymentIntent = async (req, res) => {
         quantity: 1,
       }],
       mode: 'payment',
-      success_url: successUrl,
-      cancel_url: cancelUrl,
+      success_url: successUrl.toString(),
+      cancel_url: cancelUrl.toString(),
       metadata: {
         doctorId: doctorId.toString(),
         userId: req.user?.id?.toString(),
