@@ -6,24 +6,32 @@ const stripe = stripePackage(process.env.STRIPE_SECRET_KEY);
 
 export const createPaymentIntent = async (req, res) => {
   try {
+    console.log('Creating payment intent...'); 
+    if (!req.body.amount || !req.body.doctorId || !req.body.appointmentData) {
+      console.error('Missing required fields');
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields: amount, doctorId, or appointmentData'
+      });
+    }
+
     const { amount, doctorId, appointmentData } = req.body;
+    const amountInCents = Math.round(Number(amount));
     
     const doctor = await Doctor.findById(doctorId);
     if (!doctor) {
+      console.error('Doctor not found:', doctorId);
       return res.status(404).json({ 
         success: false, 
         message: 'Doctor not found' 
       });
     }
 
-    const isProduction = process.env.NODE_ENV === 'production';
-    const frontendBaseUrl = isProduction 
-      ? `https://${process.env.FRONTEND_URL}` 
-      : process.env.FRONTEND_URL || 'http://localhost:3000';
-
+    const frontendBaseUrl = process.env.FRONTEND_URL || 'https://docfinder-online.vercel.app';
     const successUrl = `${frontendBaseUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}`;
     const cancelUrl = `${frontendBaseUrl}/booking/${doctorId}?payment_canceled=true`;
 
+    console.log('Creating Stripe session...');
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [{
@@ -33,7 +41,7 @@ export const createPaymentIntent = async (req, res) => {
             name: `Consultation with Dr. ${doctor.firstName} ${doctor.lastName}`,
             description: `Appointment on ${appointmentData.date} at ${appointmentData.time}`
           },
-          unit_amount: amount,
+          unit_amount: amountInCents,
         },
         quantity: 1,
       }],
@@ -50,6 +58,7 @@ export const createPaymentIntent = async (req, res) => {
       }
     });
 
+    console.log('Stripe session created:', session.id); 
     res.status(200).json({ 
       success: true, 
       sessionId: session.id 
@@ -59,25 +68,28 @@ export const createPaymentIntent = async (req, res) => {
     res.status(500).json({ 
       success: false, 
       message: 'Failed to create payment intent',
-      error: error.message 
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 };
-
 export const handlePaymentSuccess = async (req, res) => {
   try {
+    console.log('Handling payment success...'); 
     const { session_id } = req.query;
     
     if (!session_id || session_id === '{CHECKOUT_SESSION_ID}') {
+      console.error('Invalid session ID:', session_id);
       return res.status(400).json({ 
         success: false, 
         message: 'Invalid session ID' 
       });
     }
 
+    console.log('Retrieving Stripe session...'); 
     const session = await stripe.checkout.sessions.retrieve(session_id);
     
     if (!session || session.payment_status !== 'paid') {
+      console.error('Payment not completed:', session?.payment_status);
       return res.status(400).json({ 
         success: false, 
         message: 'Payment not completed' 
@@ -87,6 +99,7 @@ export const handlePaymentSuccess = async (req, res) => {
     const { doctorId, userId, appointmentData } = session.metadata;
     const parsedAppointmentData = JSON.parse(appointmentData);
  
+    console.log('Creating appointment...'); 
     const appointment = new Appointment({
       doctor: doctorId,
       user: userId,
@@ -106,6 +119,7 @@ export const handlePaymentSuccess = async (req, res) => {
 
     await appointment.save();
     
+    console.log('Appointment created:', appointment._id); 
     res.status(200).json({
       success: true,
       appointmentId: appointment._id
@@ -116,7 +130,7 @@ export const handlePaymentSuccess = async (req, res) => {
     res.status(500).json({ 
       success: false, 
       message: 'Failed to process payment success',
-      error: error.message 
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 };
