@@ -10,7 +10,6 @@ export async function getAllSpecialties(req, res) {
       data: specialties
     });
   } catch (error) {
-    console.error("Error fetching specialties:", error);
     res.status(500).json({
       success: false,
       message: "Error fetching specialties",

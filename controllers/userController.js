@@ -262,10 +262,8 @@ export async function verifyResetToken(req, res) {
 
   try {
     jwt.verify(token, process.env.SECRET);
-    console.log('Token verified successfully:', token); 
     res.json({ valid: true });
   } catch (error) {
-    console.error('Token verification failed:', error.message); 
     res.json({ valid: false });
   }
 }

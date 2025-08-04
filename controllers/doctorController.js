@@ -22,7 +22,6 @@ export async function getAllDoctors(req, res) {
       data: doctors
     });
   } catch (error) {
-    console.error("Error fetching doctors:", error);
     res.status(500).json({
       success: false,
       message: "Error fetching doctors",
@@ -151,13 +150,11 @@ export async function getDoctorById(req, res) {
         message: "Doctor not found"
       });
     }
- console.log("Doctor with populated center:", doctor);
     res.status(200).json({
       success: true,
       data: doctor
     });
   } catch (error) {
-    console.error("Error fetching doctor:", error);
     res.status(500).json({
       success: false,
       message: "Error fetching doctor",

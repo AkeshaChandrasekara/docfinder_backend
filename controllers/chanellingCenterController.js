@@ -9,7 +9,6 @@ export const getAllChanellingCenters = async (req, res) => {
       data: centers
     });
   } catch (error) {
-    console.error("Error fetching chanelling centers:", error);
     res.status(500).json({ 
       success: false,
       message: error.message || "Failed to load chanelling centers"

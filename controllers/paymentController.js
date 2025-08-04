@@ -14,7 +14,6 @@ export const createPaymentIntent = async (req, res) => {
     });
 
     if (!req.body.amount || !req.body.doctorId || !req.body.appointmentData) {
-      console.error('Missing required fields');
       return res.status(400).json({
         success: false,
         message: 'Missing required fields'
@@ -25,7 +24,6 @@ export const createPaymentIntent = async (req, res) => {
     
     const amountInCents = Math.round(Number(amount));
     if (isNaN(amountInCents) || amountInCents <= 0) {
-      console.error('Invalid amount:', amount);
       return res.status(400).json({
         success: false,
         message: 'Amount must be a positive number'
@@ -34,7 +32,6 @@ export const createPaymentIntent = async (req, res) => {
 
     const doctor = await Doctor.findById(doctorId);
     if (!doctor) {
-      console.error('Doctor not found:', doctorId);
       return res.status(404).json({ 
         success: false, 
         message: 'Doctor not found' 
@@ -81,8 +78,6 @@ export const createPaymentIntent = async (req, res) => {
         })
       }
     });
-
-    console.log('Stripe session created successfully:', session.id);
     return res.status(200).json({ 
       success: true, 
       sessionId: session.id 
@@ -103,33 +98,27 @@ export const createPaymentIntent = async (req, res) => {
 };
 export const handlePaymentSuccess = async (req, res) => {
   try {
-    console.log('Handling payment success verification...');
     const { session_id } = req.query;
     
     if (!session_id) {
-      console.error('No session_id provided in query parameters');
       return res.status(400).json({ 
         success: false, 
         message: 'Session ID is required' 
       });
     }
 
-    console.log('Retrieving Stripe session for ID:', session_id);
     const session = await stripe.checkout.sessions.retrieve(session_id, {
       expand: ['payment_intent']
     });
     
     if (!session) {
-      console.error('No session found for ID:', session_id);
       return res.status(404).json({ 
         success: false, 
         message: 'Payment session not found' 
       });
     }
 
-    console.log('Session payment status:', session.payment_status);
     if (session.payment_status !== 'paid') {
-      console.error('Payment not completed for session:', session_id);
       return res.status(400).json({ 
         success: false, 
         message: 'Payment not completed' 
@@ -137,7 +126,6 @@ export const handlePaymentSuccess = async (req, res) => {
     }
 
     if (!session.metadata || !session.metadata.doctorId || !session.metadata.userId) {
-      console.error('Missing required metadata in session:', session);
       return res.status(400).json({
         success: false,
         message: 'Invalid payment session data'
@@ -150,14 +138,11 @@ export const handlePaymentSuccess = async (req, res) => {
     try {
       parsedAppointmentData = JSON.parse(appointmentData);
     } catch (err) {
-      console.error('Failed to parse appointment data:', err);
       return res.status(400).json({
         success: false,
         message: 'Invalid appointment data'
       });
     }
-
-    console.log('Creating appointment record...');
     const appointment = new Appointment({
       doctor: doctorId,
       user: userId,
@@ -177,8 +162,6 @@ export const handlePaymentSuccess = async (req, res) => {
     });
 
     await appointment.save();
-    
-    console.log('Appointment created successfully:', appointment._id);
     return res.status(200).json({
       success: true,
       appointmentId: appointment._id

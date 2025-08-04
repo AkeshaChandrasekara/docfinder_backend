@@ -74,7 +74,6 @@ export async function createAppointment(req, res) {
     });
 
   } catch (error) {
-    console.error('Error creating appointment:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to create appointment',
@@ -123,7 +122,6 @@ export async function getAppointmentById(req, res) {
     });
 
   } catch (error) {
-    console.error('Error fetching appointment:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch appointment',
@@ -152,7 +150,6 @@ export async function getAllAppointments(req, res) {
       data: appointments
     });
   } catch (error) {
-    console.error('Error fetching appointments:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch appointments',
@@ -214,7 +211,6 @@ export async function updateAppointmentStatus(req, res) {
       data: updatedAppointment,
     });
   } catch (error) {
-    console.error('Error updating appointment status:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to update appointment status',
@@ -245,7 +241,6 @@ export async function getUserAppointments(req, res) {
       data: appointments
     });
   } catch (error) {
-    console.error('Error fetching user appointments:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch user appointments',
